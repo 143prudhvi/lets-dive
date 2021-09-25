@@ -5,6 +5,7 @@ import {Switch ,Route} from 'react-router-dom';
 import Header from './components/header/header.component';
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
+import ChatPage from './pages/chatpage/chatpage.component';
 
 class App extends React.Component{
   constructor(){
@@ -15,12 +16,14 @@ class App extends React.Component{
   }
 
   unSubscribeFromAuth = null
+  userRef = null
 
   componentDidMount(){
     this.unSubscribeFromAuth = auth.onAuthStateChanged( async userAuth => {
       if(userAuth){
         const userRef = await createUserProfileDocument(userAuth);
-
+        this.userRef = userRef;
+        await userRef.update({status : 'online'})
         userRef.onSnapshot(snapshot => {
           this.setState({currentUser : {
               id : snapshot.id,
@@ -40,15 +43,19 @@ class App extends React.Component{
   render(){
     return (
       <div >
-        <Header currentUser={this.state.currentUser} />
-        <Switch>
+        <Header userRef={this.userRef} currentUser={this.state.currentUser} />
+        
         {
                 this.state.currentUser ?
-                <Route exact path='/' component={HomePage} />
+              <Switch>
+                <Route exact path="/" render={(props) => <HomePage currentUser={this.state.currentUser} {...props} />} />
+                <Route path='/chat' render={(props) => <ChatPage currentUser={this.state.currentUser} {...props} />} />
+              </Switch>
                 :
-                <Route path='/' component={SignInAndSignUpPage} />
+                <Route exact path='/' component={SignInAndSignUpPage} />
+                
               }
-        </Switch>
+        
       </div>
     );
   }

@@ -8,30 +8,48 @@ class HomePage extends React.Component{
     super();
 
     this.state = {
-      users : []
+      activeUsers : [],
+      inactiveUsers : []
     }
   }
 
-  appUsers = async () => {
+  appUsers = async (currentUser) => {
     const querySnap =  await firestore.collection('users').get();
-    const allUsers = querySnap.docs.map(user => user.data());
-    this.setState({users : allUsers} , () => {
-      console.log(this.state.users)
-    });
+    const activeUsers = querySnap.docs.filter(user => {
+      if(user.data().status === "online" && user.data().uid !== currentUser.uid){
+        return true;
+      }
+    else{
+      return false;
+    }}).map(user => user.data());
+    const inactiveUsers = querySnap.docs.filter(user => user.data().status === "offline").map(user => user.data());
+    this.setState({activeUsers : activeUsers , inactiveUsers : inactiveUsers} );
     }
 
   componentDidMount(){
-    this.appUsers();
+    const {currentUser } = this.props;
+    this.appUsers(currentUser);
   }
 
   render(){
     return(
         <div className="homepage">
-          {
-            this.state.users.map(({uid , displayName}) => (
-              <UserCard key={uid} displayName={displayName} />
-            ))
-          }
+          <div className="activeUsers">
+            <h1 className="active">Active Users</h1>
+            {
+              this.state.activeUsers.map(({uid , ...allParams}) => (
+                <UserCard key={uid} uid={uid} {...allParams} />
+              ))
+            }
+          </div>
+          <div className="inactiveUsers">
+            <h1 className="inactive">Inactive Users</h1>
+            {
+              this.state.inactiveUsers.map(({ uid, ...allParams }) => (
+                <UserCard key={uid} uid={uid} {...allParams} />
+              ))
+            }
+          </div>
         </div>
     )
 }

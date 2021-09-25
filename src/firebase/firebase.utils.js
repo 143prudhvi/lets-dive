@@ -19,11 +19,12 @@ export const firestore = firebase.firestore();
 
 export const createUserProfileDocument = async (userAuth , additionalData) =>{
     if(!userAuth) return;
-
+    console.log(userAuth);
     const userRef = firestore.doc(`users/${userAuth.uid}`)
     const snapShot = await userRef.get();
     if(!snapShot.exists){
-        const {displayName , email} = userAuth;
+        const {displayName , email , uid ,photoURL} = userAuth;
+        const status = 'online';
         const createdAt = new Date();
 
         try {
@@ -31,6 +32,9 @@ export const createUserProfileDocument = async (userAuth , additionalData) =>{
                 displayName,
                 email,
                 createdAt,
+                uid,
+                status,
+                photoURL,
                 ...additionalData
             })
         } catch (error) {
@@ -46,5 +50,8 @@ provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
 provider.setCustomParameters({prompt : 'select_account'})
 
 export const signInWithGoogle = () => auth.signInWithPopup(provider);
-
+export const userCollectionRef = () => {
+    const userCollectionRef = firestore.collection('users');
+    return userCollectionRef;
+};
 export default firebase;
