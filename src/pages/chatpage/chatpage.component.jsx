@@ -125,7 +125,7 @@ class ChatPage extends React.Component{
                     label = "Message"
                     required
                 />
-                    <CustomButton  type="submit" >Send</CustomButton>
+                    <CustomButton isChatButton  type="submit" >Send</CustomButton>
             </form>
         </div>
         </>
