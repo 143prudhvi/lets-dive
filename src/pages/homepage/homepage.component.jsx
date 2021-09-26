@@ -9,26 +9,80 @@ class HomePage extends React.Component{
 
     this.state = {
       activeUsers : [],
-      inactiveUsers : []
+      inactiveUsers : [],
+      messages : []
     }
   }
 
   appUsers = async (currentUser) => {
     const querySnap =  await firestore.collection('users').get();
-    const activeUsers = querySnap.docs.filter(user => {
+    const activeUsers =await querySnap.docs.filter(user => {
       if(user.data().status === "online" && user.data().uid !== currentUser.uid){
         return true;
       }
     else{
       return false;
-    }}).map(user => user.data());
-    const inactiveUsers = querySnap.docs.filter(user => user.data().status === "offline").map(user => user.data());
+    }}).map(user => {
+      const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
+      this.updateMessage(docId , currentUser);
+    return user.data()
+    });
+
+
+    const inactiveUsers = await querySnap.docs.filter(user => user.data().status === "offline").map(user =>{
+      const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
+      this.updateMessage(docId , currentUser);
+    return user.data()
+    });
     this.setState({activeUsers : activeUsers , inactiveUsers : inactiveUsers} );
+    }
+
+    updateUsers = async (allUsers , currentUser) => {
+      const activeUsers =await allUsers.docs.filter(user => {
+        if(user.data().status === "online" && user.data().uid !== currentUser.uid){
+          return true;
+        }
+      else{
+        return false;
+      }}).map(user => {
+        const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
+        this.updateMessage(docId , currentUser);
+        console.log(user.data());
+      return user.data()
+      });
+  
+  
+      const inactiveUsers = await allUsers.docs.filter(user => user.data().status === "offline").map(user =>{
+        const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
+        this.updateMessage(docId , currentUser);
+        console.log(user.data());
+      return user.data()
+      });
+      this.setState({activeUsers : activeUsers , inactiveUsers : inactiveUsers} );
     }
 
   componentDidMount(){
     const {currentUser } = this.props;
     this.appUsers(currentUser);
+    const userCollectionnRef = firestore.collection('users');
+    userCollectionnRef.onSnapshot((allUsers) => {
+      this.updateUsers(allUsers , currentUser)
+    })
+  }
+
+  componentDidUpdate(){
+
+  }
+
+  updateMessage = async (docId , currentUser) => {
+    const allMessages = await firestore.collection('chats').doc(docId).collection('messages').orderBy("createdAt" , "asc").get();
+      allMessages.docs.map(message => {
+          if(message.data().sentBy !== currentUser.uid && message.data().status === "sent"){
+              console.log("Its changing Here")
+              firestore.collection('chats').doc(docId).collection('messages').doc(message.id).update({status : "received"});
+          }
+          return message.data()
+      })
   }
 
   render(){

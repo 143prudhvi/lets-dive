@@ -10,7 +10,8 @@ const Message = ({sentBy , uid , message , creaedAt , status}) => (
         <div className={`${sentBy === uid ? "message-box" : "message-box message-partner"}`} >
             {message}
             <div className="time">
-                <small >3:45 PM 
+                <small >3:45 PM
+                    {/* {creaedAt.toDate().toString()} */}
                     {
                         sentBy === uid ?
                         status==="sent" ?

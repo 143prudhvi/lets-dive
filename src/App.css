@@ -1,6 +1,7 @@
 body{
   font-family: 'Open Sans Condensed';
   padding: 20px 60px;
+  overflow-y: hidden;
 }
 
 a{
@@ -11,3 +12,5 @@ a{
 * {
   box-sizing: border-box;
 }
+
+

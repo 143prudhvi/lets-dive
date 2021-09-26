@@ -21,21 +21,22 @@ class ChatPage extends React.Component{
         const {currentUser} = this.props;
         this.currentUser = currentUser;
         const {uid} = this.props.location.state;
-        console.log(this.props);
-        console.log(`ComponentDidMount ${currentUser.uid}`)
         this.docId = uid > currentUser.uid ? uid + "-" + currentUser.uid : currentUser.uid + "-" + uid ;
+        this.updateMessages();
         const messagesRef =  firestore.collection('chats').doc(this.docId).collection('messages').orderBy("createdAt" , "asc");
         messagesRef.onSnapshot((allMessages) => {
-            const messages = allMessages.docs.map(message => {
-                if(message.data().sentBy !== this.currentUser.uid && message.data().status !== "seen"){
-                    console.log("Its changing Here")
-                    firestore.collection('chats').doc(this.docId).collection('messages').doc(message.id).update({status : "seen"});
-                }
-                return message.data()
+            const messages = allMessages.docs.map(message => message.data())
+            this.setState({messages : messages} , () => {
+                
             })
-            this.setState({messages : messages} , () => console.log(this.state))
         } )
         
+    }
+
+    componentDidUpdate(){
+        this.updateMessages();
+        var div = document.getElementsByClassName("chat")[0];
+        div.scrollTop = div.scrollHeight - div.clientHeight;
     }
 
     componentWillUnmount(){
@@ -43,14 +44,18 @@ class ChatPage extends React.Component{
         console.log('ComponentWillUnmount')
     }
 
-    // getMessages = async () => {
-    //     const allMessages = await firestore.collection('chats').doc(this.docId).collection('messages').orderBy("createdAt" , "asc").get();
-    //     const messages = allMessages.docs.map(message => 
-    //         message.data()
-    //     )
-    //     this.setState({messages : messages})
+    updateMessages = async () => {
+        const allMessages = await firestore.collection('chats').doc(this.docId).collection('messages').orderBy("createdAt" , "asc").get();
+        allMessages.docs.map(message => {
+            if(message.data().sentBy !== this.currentUser.uid && message.data().status !== "seen"){
+                console.log("Its changing Here")
+                firestore.collection('chats').doc(this.docId).collection('messages').doc(message.id).update({status : "seen"});
+            }
+            return null
+        }
+        )
 
-    // }
+    }
 
 
     // createChatDocument = async () => {
@@ -82,7 +87,7 @@ class ChatPage extends React.Component{
                 message : message,
                 sentBy : this.currentUser.uid,
                 createdAt : new Date(),
-                status : 'received'
+                status : 'sent'
             })
             this.setState({message : ""});
         } catch (error) {
@@ -99,6 +104,7 @@ class ChatPage extends React.Component{
     render(){
         const { displayName} = this.props.location.state;
         return(
+            <>
             <div className="chat">
                 <h2 className="name">{`Chating with ${displayName}`}</h2>
                 <div className="chat-messages">
@@ -108,19 +114,21 @@ class ChatPage extends React.Component{
                         ))
                     }
                 </div>
-                
-                <form onSubmit={this.handleSubmit}>
-                    <FormInput
-                        name = "message"
-                        type = "text"
-                        handleChange = {this.handleChange}
-                        value = {this.state.message}
-                        label = "Message"
-                        required
-                    />
-                        <CustomButton type="submit" >Send</CustomButton>
-                </form>
             </div>
+            <div className="send-msg">
+            <form onSubmit={this.handleSubmit}>
+                <FormInput
+                    name = "message"
+                    type = "text"
+                    handleChange = {this.handleChange}
+                    value = {this.state.message}
+                    label = "Message"
+                    required
+                />
+                    <CustomButton  type="submit" >Send</CustomButton>
+            </form>
+        </div>
+        </>
         )
     }
 }

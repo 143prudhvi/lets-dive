@@ -59,3 +59,20 @@
     border-bottom: 10px solid rgba(0, 114, 135, .2);
     border-left: none;
   }
+
+  .send-msg{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  }
+
+  .chat{
+    position: fixed;
+    top:70px !important;
+    bottom: 200px !important;
+    left: 0;
+    right: 0;
+    overflow-y: scroll;
+  }
