@@ -25,7 +25,15 @@ class ChatPage extends React.Component{
         this.updateMessages();
         const messagesRef =  firestore.collection('chats').doc(this.docId).collection('messages').orderBy("createdAt" , "asc");
         messagesRef.onSnapshot((allMessages) => {
-            const messages = allMessages.docs.map(message => message.data())
+            const messages = allMessages.docs.map(message => {
+                const msg = message.data();
+                const time = msg.createdAt.seconds % 86400 + 19800;
+                const hours = Math.floor(time/3600);
+                msg.time = (hours ===0 ? "12:" : hours > 12 ? hours-12 + ":" : hours + ":")
+                    + (Math.floor(time/60)%60 === 0 ? "00" : Math.floor(time/60)%60 < 10 ? "0" + Math.floor(time/60)%60 : Math.floor(time/60)%60) + 
+                    (hours ===0 ? " am" : hours >= 12 ? " pm" : " am");
+                return msg;
+            })
             this.setState({messages : messages} , () => {
                 
             })

@@ -5,30 +5,44 @@ import {ReactComponent as DoubleTick} from '../../assets/doubleTick.svg';
 import {ReactComponent as BlueTick} from '../../assets/blueTick.svg';
 
 
-const Message = ({sentBy , uid , message , creaedAt , status}) => (
-    <div className="message-box-holder">
-        <div className={`${sentBy === uid ? "message-box" : "message-box message-partner"}`} >
-            {message}
-            <div className="time">
-                <small >3:45 PM
-                    {/* {creaedAt.toDate().toString()} */}
-                    {
-                        sentBy === uid ?
-                        status==="sent" ?
-                        <SingleTick className="message-status"/>
-                        : status==="received" ? 
-                        <DoubleTick className="message-status"/>
-                        :
-                        <BlueTick className="message-status"/>
-                        :
-                        <></>
-                    }
-                </small>
-            </div>
-        </div>
-        
-    </div>
-        
-)
+
+class Message extends React.Component{
+    constructor(){
+        super();
+        this.state = {}
+    }
+
+    time = (time) => {
+        console.log()
+    }
+
+    render(){
+        const {sentBy , uid , message , time, status} = this.props;
+        return(
+            <div className="message-box-holder">
+                    <div className={`${sentBy === uid ? "message-box" : "message-box message-partner"}`} >
+                        {message}
+                        <div className="time">
+                            <small >{time}
+                                {/* {creaedAt.toDate().toString()} */}
+                                {
+                                    sentBy === uid ?
+                                    status==="sent" ?
+                                    <SingleTick className="message-status"/>
+                                    : status==="received" ? 
+                                    <DoubleTick className="message-status"/>
+                                    :
+                                    <BlueTick className="message-status"/>
+                                    :
+                                    <></>
+                                }
+                            </small>
+                        </div>
+                    </div>
+                    
+                </div>
+        )
+    }
+}
 
 export default Message;

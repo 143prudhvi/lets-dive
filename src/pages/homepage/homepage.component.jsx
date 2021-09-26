@@ -10,7 +10,7 @@ class HomePage extends React.Component{
     this.state = {
       activeUsers : [],
       inactiveUsers : [],
-      messages : []
+      messages : 0
     }
   }
 
@@ -47,7 +47,7 @@ class HomePage extends React.Component{
       }}).map(user => {
         const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
         this.updateMessage(docId , currentUser);
-        console.log(user.data());
+        // this.getRemaining(docId , currentUser);
       return user.data()
       });
   
@@ -55,7 +55,7 @@ class HomePage extends React.Component{
       const inactiveUsers = await allUsers.docs.filter(user => user.data().status === "offline").map(user =>{
         const docId = user.data().uid > currentUser.uid ? user.data().uid + "-" + currentUser.uid : currentUser.uid + "-" + user.data().uid ;
         this.updateMessage(docId , currentUser);
-        console.log(user.data());
+        // this.getRemaining(docId , currentUser);
       return user.data()
       });
       this.setState({activeUsers : activeUsers , inactiveUsers : inactiveUsers} );
@@ -70,8 +70,18 @@ class HomePage extends React.Component{
     })
   }
 
-  componentDidUpdate(){
+  // getRemaining = async (docId,currentUser) => {
+  //   const messages =  await firestore.collection('chats').doc(docId).collection('messages').where("status","==" , "received").get();
+  //   messages.docs.filter(message => message.data().sentBy !== currentUser.uid).map(message => console.log(message.data()))
+  // }
 
+  componentDidUpdate(){
+    console.log('Update');
+    const {currentUser } = this.props;
+    const userCollectionnRef = firestore.collection('users');
+    userCollectionnRef.onSnapshot((allUsers) => {
+      this.updateUsers(allUsers , currentUser)
+    })
   }
 
   updateMessage = async (docId , currentUser) => {
